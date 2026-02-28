@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@theme inline {
+  --color-green-terminal: #4ade80;
+  --color-cyan-terminal: #22d3ee;
+  --color-amber-terminal: #fbbf24;
+  --color-purple-terminal: #a78bfa;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes terminalType {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.glow-green {
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+}
+
+.glow-border {
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.1), inset 0 0 15px rgba(74, 222, 128, 0.05);
+}

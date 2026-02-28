@@ -31,3 +31,5 @@ npm-debug.log*
 
 # Coverage
 coverage/
+website/node_modules/
+website/.next/
