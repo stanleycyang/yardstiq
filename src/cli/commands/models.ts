@@ -1,10 +1,9 @@
 import chalk from 'chalk';
 import { formatCost } from '../../core/cost.js';
 import { MODEL_REGISTRY } from '../../core/models.js';
-import { getAvailableProviders, isGatewayAvailable } from '../../providers/registry.js';
+import { isGatewayAvailable } from '../../providers/registry.js';
 
 export async function listModels(): Promise<void> {
-	const available = getAvailableProviders();
 	const gatewayEnabled = isGatewayAvailable();
 
 	console.log(chalk.bold.cyan('\nAvailable Models\n'));
@@ -12,42 +11,73 @@ export async function listModels(): Promise<void> {
 	if (gatewayEnabled) {
 		console.log(
 			chalk.green('  AI Gateway active') +
-				chalk.dim(' — all models accessible via AI_GATEWAY_API_KEY\n'),
+				chalk.dim(' — all models accessible via Vercel AI Gateway\n'),
 		);
-	}
-
-	console.log(
-		`${chalk.bold(pad('Alias', 18))}${pad('Name', 22)}${pad('Provider', 12)}${pad('Input/1M', 10)}${pad('Output/1M', 10)}${pad('Status', 8)}`,
-	);
-	console.log('─'.repeat(80));
-
-	for (const [alias, model] of Object.entries(MODEL_REGISTRY)) {
-		const directKey = available.includes(model.provider);
-		const status = directKey
-			? chalk.green('✓ key')
-			: gatewayEnabled
-				? chalk.blue('✓ gw')
-				: chalk.red('✗');
-
+	} else {
 		console.log(
-			`${pad(alias, 18)}${pad(model.name, 22)}${pad(model.provider, 12)}${pad(formatCost(model.pricing.input), 10)}${pad(formatCost(model.pricing.output), 10)}${status}`,
+			chalk.red('  AI Gateway not configured') +
+				chalk.dim(' — set AI_GATEWAY_API_KEY to access models\n'),
 		);
 	}
 
-	console.log('');
-	console.log(chalk.dim('✓ key = direct API key    ✓ gw = via AI Gateway    ✗ = no access'));
-	console.log(chalk.dim('Ollama models: use "local:<model>" (e.g., local:llama3.2)'));
-	console.log(chalk.dim('Gateway models: use "provider/model" (e.g., openai/gpt-5.2, xai/grok-3)'));
+	// Group models by provider
+	const groups = new Map<string, [string, typeof MODEL_REGISTRY[string]][]>();
+	for (const [alias, model] of Object.entries(MODEL_REGISTRY)) {
+		const provider = model.modelId.split('/')[0] || 'other';
+		if (!groups.has(provider)) groups.set(provider, []);
+		groups.get(provider)!.push([alias, model]);
+	}
+
+	for (const [provider, models] of groups) {
+		console.log(chalk.bold(`  ${providerLabel(provider)}`));
+
+		for (const [alias, model] of models) {
+			const input = formatCost(model.pricing.input);
+			const output = formatCost(model.pricing.output);
+			const pricing = model.pricing.input === 0
+				? chalk.dim('free')
+				: chalk.dim(`${input}/${output} per 1M tok`);
+			const status = gatewayEnabled ? chalk.green('✓') : chalk.red('✗');
+
+			console.log(
+				`    ${status} ${chalk.white(pad(alias, 22))}${chalk.dim(pad(model.name, 24))}${pricing}`,
+			);
+		}
+		console.log('');
+	}
+
+	console.log(chalk.dim('  Ollama models: use "local:<model>" (e.g., local:llama3.2)'));
+	console.log(chalk.dim('  Any gateway model: use "provider/model" (e.g., xai/grok-3, alibaba/qwen3-max)'));
 
 	if (!gatewayEnabled) {
 		console.log(
-			chalk.dim(
-				'\nTip: Set AI_GATEWAY_API_KEY for one-key access to all models. Get one at https://vercel.com/ai-gateway',
+			chalk.yellow(
+				'\n  Set AI_GATEWAY_API_KEY to access all models:',
 			),
 		);
+		console.log(chalk.dim('    export AI_GATEWAY_API_KEY=your_key'));
+		console.log(chalk.dim('    Get one at https://vercel.com/ai-gateway'));
 	}
 
 	console.log('');
+}
+
+function providerLabel(provider: string): string {
+	const labels: Record<string, string> = {
+		anthropic: 'Anthropic',
+		openai: 'OpenAI',
+		google: 'Google',
+		deepseek: 'DeepSeek',
+		mistral: 'Mistral',
+		meta: 'Meta (Llama)',
+		xai: 'xAI (Grok)',
+		amazon: 'Amazon',
+		cohere: 'Cohere',
+		alibaba: 'Alibaba (Qwen)',
+		moonshotai: 'Moonshot AI (Kimi)',
+		minimax: 'MiniMax',
+	};
+	return labels[provider] || provider;
 }
 
 function pad(str: string, width: number): string {

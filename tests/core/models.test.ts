@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getGatewayModelId, MODEL_REGISTRY, resolveModel } from '../../src/core/models.js';
+import { MODEL_REGISTRY, resolveModel } from '../../src/core/models.js';
 
 describe('MODEL_REGISTRY', () => {
 	it('has all expected models', () => {
@@ -9,19 +9,24 @@ describe('MODEL_REGISTRY', () => {
 		expect(aliases).toContain('claude-opus');
 		expect(aliases).toContain('gpt-4o');
 		expect(aliases).toContain('gpt-4o-mini');
+		expect(aliases).toContain('gpt-5');
 		expect(aliases).toContain('gemini-pro');
 		expect(aliases).toContain('gemini-flash');
-		expect(aliases).toContain('llama3');
 		expect(aliases).toContain('deepseek');
 		expect(aliases).toContain('mistral-large');
+		expect(aliases).toContain('llama-4-maverick');
 	});
 
-	it('maps claude-sonnet to correct model ID', () => {
-		expect(MODEL_REGISTRY['claude-sonnet'].modelId).toBe('claude-sonnet-4-20250514');
+	it('all models use gateway provider', () => {
+		for (const config of Object.values(MODEL_REGISTRY)) {
+			expect(config.provider).toBe('gateway');
+		}
 	});
 
-	it('maps claude-opus to correct model ID', () => {
-		expect(MODEL_REGISTRY['claude-opus'].modelId).toBe('claude-opus-4-6');
+	it('all model IDs use provider/model format', () => {
+		for (const config of Object.values(MODEL_REGISTRY)) {
+			expect(config.modelId).toContain('/');
+		}
 	});
 
 	it('all entries have required fields', () => {
@@ -39,14 +44,9 @@ describe('MODEL_REGISTRY', () => {
 describe('resolveModel', () => {
 	it('resolves aliases', () => {
 		const model = resolveModel('claude-sonnet');
-		expect(model.name).toBe('Claude Sonnet');
-		expect(model.modelId).toBe('claude-sonnet-4-20250514');
-		expect(model.provider).toBe('anthropic');
-	});
-
-	it('resolves full model IDs', () => {
-		const model = resolveModel('claude-sonnet-4-20250514');
-		expect(model.alias).toBe('claude-sonnet');
+		expect(model.name).toBe('Claude Sonnet 4.6');
+		expect(model.modelId).toBe('anthropic/claude-sonnet-4.6');
+		expect(model.provider).toBe('gateway');
 	});
 
 	it('resolves local (Ollama) models', () => {
@@ -72,40 +72,18 @@ describe('resolveModel', () => {
 	});
 
 	it('resolves gateway format with unknown model', () => {
-		const model = resolveModel('xai/grok-3');
+		const model = resolveModel('somevendor/new-model');
 		expect(model.provider).toBe('gateway');
-		expect(model.modelId).toBe('xai/grok-3');
-		expect(model.alias).toBe('xai/grok-3');
+		expect(model.modelId).toBe('somevendor/new-model');
+		expect(model.alias).toBe('somevendor/new-model');
 		expect(model.pricing.input).toBe(0);
 		expect(model.pricing.output).toBe(0);
 	});
 
-	it('resolves gateway format for anthropic model', () => {
-		const model = resolveModel('anthropic/claude-sonnet-4-20250514');
+	it('resolves grok-3 alias from registry', () => {
+		const model = resolveModel('grok-3');
 		expect(model.provider).toBe('gateway');
-		expect(model.name).toBe('Claude Sonnet');
+		expect(model.modelId).toBe('xai/grok-3');
 		expect(model.pricing.input).toBe(3.0);
-	});
-});
-
-describe('getGatewayModelId', () => {
-	it('creates gateway model ID for known providers', () => {
-		expect(getGatewayModelId(MODEL_REGISTRY['claude-sonnet'])).toBe(
-			'anthropic/claude-sonnet-4-20250514',
-		);
-		expect(getGatewayModelId(MODEL_REGISTRY['gpt-4o'])).toBe('openai/gpt-4o');
-		expect(getGatewayModelId(MODEL_REGISTRY['gemini-pro'])).toBe('google/gemini-2.0-pro');
-	});
-
-	it('returns modelId as-is for unknown providers', () => {
-		expect(
-			getGatewayModelId({
-				name: 'Test',
-				modelId: 'test-model',
-				provider: 'unknown',
-				alias: 'test',
-				pricing: { input: 0, output: 0 },
-			}),
-		).toBe('test-model');
 	});
 });

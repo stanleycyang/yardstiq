@@ -4,12 +4,7 @@ import { join } from 'node:path';
 
 export interface AidiffConfig {
 	keys?: {
-		anthropic?: string;
-		openai?: string;
-		google?: string;
-		groq?: string;
-		deepseek?: string;
-		mistral?: string;
+		gateway?: string;
 	};
 	defaults?: {
 		models?: string[];
@@ -45,10 +40,9 @@ export function saveConfig(config: AidiffConfig): void {
 export function setConfigValue(key: string, value: string): void {
 	const config = getConfig();
 
-	if (key.endsWith('-key')) {
-		const provider = key.replace('-key', '');
+	if (key === 'gateway-key') {
 		if (!config.keys) config.keys = {};
-		(config.keys as Record<string, string>)[provider] = value;
+		config.keys.gateway = value;
 	} else {
 		if (!config.defaults) config.defaults = {};
 		if (key === 'temperature') {
@@ -66,11 +60,7 @@ export function setConfigValue(key: string, value: string): void {
 export function getConfigValue(key: string): string | undefined {
 	const config = getConfig();
 
-	if (key.endsWith('-key')) {
-		const provider = key.replace('-key', '');
-		return config.keys?.[provider as keyof NonNullable<AidiffConfig['keys']>];
-	}
-
+	if (key === 'gateway-key') return config.keys?.gateway;
 	if (key === 'temperature') return config.defaults?.temperature?.toString();
 	if (key === 'max-tokens') return config.defaults?.maxTokens?.toString();
 	if (key === 'judge-model') return config.defaults?.judgeModel;

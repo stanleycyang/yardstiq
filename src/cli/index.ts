@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { Command } from 'commander';
 import { resolveModel } from '../core/models.js';
-import { resolveProvider } from '../providers/registry.js';
+import { isGatewayAvailable } from '../providers/registry.js';
 
 const require = createRequire(import.meta.url);
 // Path is relative to bundled dist/index.js, not the source file
@@ -55,14 +55,13 @@ program
 
 		const models = (options.model as string[]).map(resolveModel);
 
-		// Validate API keys upfront (resolveProvider handles gateway fallback)
-		for (const model of models) {
-			try {
-				resolveProvider(model);
-			} catch (err) {
-				console.error(`Error: ${(err as Error).message}`);
-				process.exit(1);
-			}
+		// Validate gateway key for non-local models
+		const needsGateway = models.some((m) => m.provider !== 'ollama');
+		if (needsGateway && !isGatewayAvailable()) {
+			console.error(
+				'Error: AI_GATEWAY_API_KEY not set. Get one at https://vercel.com/ai-gateway',
+			);
+			process.exit(1);
 		}
 
 		const request = {

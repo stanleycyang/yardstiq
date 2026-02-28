@@ -27,10 +27,7 @@ export async function handleConfig(action: string, key?: string, value?: string)
 	if (action === 'set') {
 		if (!key || !value) {
 			console.error('Usage: yardstiq config set <key> <value>');
-			console.error(
-				'Keys: openai-key, anthropic-key, google-key, groq-key, deepseek-key, mistral-key',
-			);
-			console.error('      temperature, max-tokens, judge-model');
+			console.error('Keys: gateway-key, temperature, max-tokens, judge-model');
 			process.exit(1);
 		}
 		setConfigValue(key, value);
