@@ -58,9 +58,7 @@ program
 		// Validate gateway key for non-local models
 		const needsGateway = models.some((m) => m.provider !== 'ollama');
 		if (needsGateway && !isGatewayAvailable()) {
-			console.error(
-				'Error: AI_GATEWAY_API_KEY not set. Get one at https://vercel.com/ai-gateway',
-			);
+			console.error('Error: AI_GATEWAY_API_KEY not set. Get one at https://vercel.com/ai-gateway');
 			process.exit(1);
 		}
 

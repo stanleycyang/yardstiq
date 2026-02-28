@@ -12,9 +12,7 @@ type ProviderFactory = (modelId: string) => any;
 function createGatewayProvider(): ProviderFactory {
 	const key = process.env.AI_GATEWAY_API_KEY;
 	if (!key) {
-		throw new Error(
-			'AI_GATEWAY_API_KEY not set. Get one at https://vercel.com/ai-gateway',
-		);
+		throw new Error('AI_GATEWAY_API_KEY not set. Get one at https://vercel.com/ai-gateway');
 	}
 	return createGateway({ apiKey: key }) as unknown as ProviderFactory;
 }

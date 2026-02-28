@@ -21,11 +21,11 @@ export async function listModels(): Promise<void> {
 	}
 
 	// Group models by provider
-	const groups = new Map<string, [string, typeof MODEL_REGISTRY[string]][]>();
+	const groups = new Map<string, [string, (typeof MODEL_REGISTRY)[string]][]>();
 	for (const [alias, model] of Object.entries(MODEL_REGISTRY)) {
 		const provider = model.modelId.split('/')[0] || 'other';
 		if (!groups.has(provider)) groups.set(provider, []);
-		groups.get(provider)!.push([alias, model]);
+		groups.get(provider)?.push([alias, model]);
 	}
 
 	for (const [provider, models] of groups) {
@@ -34,9 +34,8 @@ export async function listModels(): Promise<void> {
 		for (const [alias, model] of models) {
 			const input = formatCost(model.pricing.input);
 			const output = formatCost(model.pricing.output);
-			const pricing = model.pricing.input === 0
-				? chalk.dim('free')
-				: chalk.dim(`${input}/${output} per 1M tok`);
+			const pricing =
+				model.pricing.input === 0 ? chalk.dim('free') : chalk.dim(`${input}/${output} per 1M tok`);
 			const status = gatewayEnabled ? chalk.green('✓') : chalk.red('✗');
 
 			console.log(
@@ -47,14 +46,12 @@ export async function listModels(): Promise<void> {
 	}
 
 	console.log(chalk.dim('  Ollama models: use "local:<model>" (e.g., local:llama3.2)'));
-	console.log(chalk.dim('  Any gateway model: use "provider/model" (e.g., xai/grok-3, alibaba/qwen3-max)'));
+	console.log(
+		chalk.dim('  Any gateway model: use "provider/model" (e.g., xai/grok-3, alibaba/qwen3-max)'),
+	);
 
 	if (!gatewayEnabled) {
-		console.log(
-			chalk.yellow(
-				'\n  Set AI_GATEWAY_API_KEY to access all models:',
-			),
-		);
+		console.log(chalk.yellow('\n  Set AI_GATEWAY_API_KEY to access all models:'));
 		console.log(chalk.dim('    export AI_GATEWAY_API_KEY=your_key'));
 		console.log(chalk.dim('    Get one at https://vercel.com/ai-gateway'));
 	}
