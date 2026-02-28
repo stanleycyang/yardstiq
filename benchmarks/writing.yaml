@@ -1,0 +1,32 @@
+name: "Writing Benchmark"
+description: "Test technical writing, creative writing, and communication skills"
+models:
+  - claude-sonnet
+  - gpt-4o
+judge:
+  enabled: true
+  model: claude-sonnet
+  criteria: "Focus on clarity, engagement, appropriate tone, and structural quality"
+prompts:
+  - name: "Technical blog post"
+    prompt: "Write a concise technical blog post (300-500 words) explaining how database connection pooling works, why it matters for web applications, and common pitfalls to avoid. Target audience: intermediate backend developers."
+    maxTokens: 1024
+
+  - name: "Professional email"
+    prompt: "Draft a professional email to a client explaining that a project deadline will be delayed by 2 weeks due to unexpected technical challenges with a third-party API integration. Be transparent but maintain confidence. Keep it under 200 words."
+    maxTokens: 512
+
+  - name: "Creative fiction"
+    prompt: "Write a complete flash fiction story (under 500 words) with a twist ending. The story should be set in a mundane everyday setting but reveal something extraordinary in the final lines."
+    maxTokens: 1024
+
+  - name: "Summarization"
+    prompt: |
+      Summarize the following text in exactly 3 bullet points, each under 30 words:
+
+      "Machine learning models require vast amounts of data to train effectively. The quality of training data directly impacts model performance - noisy or biased data leads to poor predictions. Data augmentation techniques can help expand limited datasets by creating synthetic variations. Transfer learning offers another approach, allowing models pre-trained on large datasets to be fine-tuned for specific tasks with minimal data. Active learning strategies can reduce labeling costs by identifying the most informative samples for human annotation. The data pipeline itself must be robust, with proper validation, versioning, and monitoring to ensure reproducibility and catch data drift over time."
+    maxTokens: 512
+
+  - name: "Persuasive argument"
+    prompt: "Write a persuasive argument (300-400 words) for why software companies should invest in developer experience (DevEx) tooling. Include at least one concrete example and address a likely counterargument."
+    maxTokens: 1024

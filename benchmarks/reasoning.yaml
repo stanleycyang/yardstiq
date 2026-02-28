@@ -1,0 +1,38 @@
+name: "Reasoning Benchmark"
+description: "Test logical reasoning, probability, and analytical thinking"
+models:
+  - claude-sonnet
+  - gpt-4o
+judge:
+  enabled: true
+  model: claude-sonnet
+  criteria: "Focus on logical correctness, clarity of explanation, and sound reasoning"
+prompts:
+  - name: "Monty Hall problem"
+    prompt: "Explain the Monty Hall problem and prove mathematically why switching doors gives a 2/3 probability of winning. Include a clear step-by-step Bayesian analysis."
+    expectedContains: ["2/3"]
+    maxTokens: 1024
+
+  - name: "Logic puzzle"
+    prompt: |
+      Solve this logic puzzle:
+      Five people (A, B, C, D, E) sit in a row.
+      - A is not at either end.
+      - B is somewhere to the left of C.
+      - D is adjacent to E.
+      - C is not adjacent to A.
+      List all valid seating arrangements.
+    maxTokens: 1024
+
+  - name: "Probability"
+    prompt: "You have a fair coin. You flip it repeatedly until you get two consecutive heads. What is the expected number of flips? Derive the answer using a system of equations."
+    expectedContains: ["6"]
+    maxTokens: 1024
+
+  - name: "Causal reasoning"
+    prompt: "A study finds that cities with more firefighters have more fire damage. Does this mean firefighters cause fire damage? Explain the concept of confounding variables, and describe how you would design a study to determine the true causal relationship. Give at least two specific confounders."
+    maxTokens: 1024
+
+  - name: "Ethical dilemma"
+    prompt: "Analyze the trolley problem from three ethical frameworks: utilitarianism, deontological ethics, and virtue ethics. For each framework, explain what action it prescribes and why. Then discuss which framework you find most compelling and why."
+    maxTokens: 2048

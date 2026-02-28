@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Packed tarballs
+*.tgz
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment / secrets
+.env
+.env.*
+
+# aidiff local data
+.aidiff/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/

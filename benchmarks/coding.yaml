@@ -1,0 +1,50 @@
+name: "Coding Benchmark"
+description: "Test code generation, debugging, and system design skills"
+models:
+  - claude-sonnet
+  - gpt-4o
+judge:
+  enabled: true
+  model: claude-sonnet
+  criteria: "Focus on code correctness, efficiency, and readability"
+prompts:
+  - name: "Merge sorted lists"
+    prompt: "Write a Python function that merges k sorted lists into one sorted list. Include type hints and handle edge cases."
+    expectedContains: ["def merge", "List"]
+    maxTokens: 1024
+
+  - name: "Binary search variants"
+    prompt: "Implement binary search in TypeScript that finds the leftmost insertion point (like Python's bisect_left). Include generics and comparison function support."
+    expectedContains: ["function"]
+    maxTokens: 1024
+
+  - name: "SQL query optimization"
+    prompt: "Given a users table (id, name, email, created_at) and an orders table (id, user_id, amount, created_at), write an optimized SQL query to find the top 10 users by total order amount in the last 30 days. Explain your indexing strategy."
+    expectedContains: ["SELECT", "JOIN"]
+    maxTokens: 1024
+
+  - name: "Debug async code"
+    prompt: |
+      Debug this JavaScript code that's supposed to process items in parallel with a concurrency limit, but has race conditions:
+
+      ```javascript
+      async function processAll(items, limit) {
+        let index = 0;
+        const results = [];
+        async function next() {
+          const i = index++;
+          if (i >= items.length) return;
+          results[i] = await process(items[i]);
+          await next();
+        }
+        await Promise.all(Array(limit).fill(next()));
+        return results;
+      }
+      ```
+
+      Explain the bugs and provide a corrected version.
+    maxTokens: 1024
+
+  - name: "System design"
+    prompt: "Design a rate limiter for an API gateway that supports both per-user and global rate limits. Describe the data structures, algorithm (e.g., token bucket or sliding window), and how it handles distributed deployments. Provide pseudocode."
+    maxTokens: 2048

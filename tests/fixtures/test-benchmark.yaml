@@ -1,0 +1,16 @@
+name: "Test Benchmark"
+description: "Minimal benchmark for testing"
+models:
+  - claude-sonnet
+  - gpt-4o
+judge:
+  enabled: true
+  model: claude-sonnet
+prompts:
+  - name: "Hello world"
+    prompt: "Say hello world"
+    expectedContains: ["hello"]
+  - name: "Count to five"
+    prompt: "Count from 1 to 5"
+    system: "Be concise"
+    maxTokens: 256
