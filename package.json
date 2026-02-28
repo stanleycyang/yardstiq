@@ -1,6 +1,6 @@
 {
   "name": "yardstiq",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Side-by-side AI model comparison CLI",
   "type": "module",
   "bin": {
