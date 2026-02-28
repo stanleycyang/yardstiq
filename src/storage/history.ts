@@ -3,7 +3,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import type { ComparisonResult } from '../core/types.js';
 
-const HISTORY_DIR = join(homedir(), '.aidiff', 'history');
+const HISTORY_DIR = join(homedir(), '.yardstiq', 'history');
 
 function ensureHistoryDir(): void {
 	if (!existsSync(HISTORY_DIR)) {

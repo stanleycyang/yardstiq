@@ -12,7 +12,7 @@ export async function handleConfig(action: string, key?: string, value?: string)
 
 	if (action === 'get') {
 		if (!key) {
-			console.error('Usage: aidiff config get <key>');
+			console.error('Usage: yardstiq config get <key>');
 			process.exit(1);
 		}
 		const val = getConfigValue(key);
@@ -26,7 +26,7 @@ export async function handleConfig(action: string, key?: string, value?: string)
 
 	if (action === 'set') {
 		if (!key || !value) {
-			console.error('Usage: aidiff config set <key> <value>');
+			console.error('Usage: yardstiq config set <key> <value>');
 			console.error(
 				'Keys: openai-key, anthropic-key, google-key, groq-key, deepseek-key, mistral-key',
 			);

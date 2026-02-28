@@ -11,7 +11,7 @@ const { version } = require('../package.json');
 const program = new Command();
 
 program
-	.name('aidiff')
+	.name('yardstiq')
 	.description('Compare AI model outputs side-by-side in your terminal')
 	.version(version)
 	.argument('[prompt...]', 'The prompt to send to all models')
@@ -44,7 +44,7 @@ program
 			}
 			prompt = Buffer.concat(chunks).toString('utf-8').trim();
 		} else {
-			console.error('Error: No prompt provided. Use aidiff "your prompt" or pipe via stdin.');
+			console.error('Error: No prompt provided. Use yardstiq "your prompt" or pipe via stdin.');
 			process.exit(1);
 		}
 

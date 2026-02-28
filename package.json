@@ -1,10 +1,10 @@
 {
-  "name": "aidiff",
+  "name": "yardstiq",
   "version": "0.1.0",
   "description": "Side-by-side AI model comparison CLI",
   "type": "module",
   "bin": {
-    "aidiff": "./dist/index.js"
+    "yardstiq": "dist/index.js"
   },
   "exports": {
     ".": "./dist/index.js"
@@ -36,7 +36,7 @@
   "author": "Stanley Yang",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stanleycyang/aidiff.git"
+    "url": "git+https://github.com/stanleycyang/aidiff.git"
   },
   "homepage": "https://github.com/stanleycyang/aidiff",
   "bugs": {

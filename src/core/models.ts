@@ -187,6 +187,6 @@ export function resolveModel(input: string): ModelConfig {
 	if (byModelId) return byModelId;
 
 	throw new Error(
-		`Unknown model: "${input}". Use an alias (e.g. claude-sonnet), gateway format (e.g. openai/gpt-4o), or run "aidiff models".`,
+		`Unknown model: "${input}". Use an alias (e.g. claude-sonnet), gateway format (e.g. openai/gpt-4o), or run "yardstiq models".`,
 	);
 }

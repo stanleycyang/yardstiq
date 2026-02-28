@@ -19,7 +19,7 @@ export interface AidiffConfig {
 	};
 }
 
-const CONFIG_DIR = join(homedir(), '.aidiff');
+const CONFIG_DIR = join(homedir(), '.yardstiq');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 
 function ensureConfigDir(): void {

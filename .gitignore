@@ -22,8 +22,8 @@ Thumbs.db
 .env
 .env.*
 
-# aidiff local data
-.aidiff/
+# yardstiq local data
+.yardstiq/
 
 # Logs
 *.log

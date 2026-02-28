@@ -130,7 +130,7 @@ export function resolveProvider(model: ModelConfig): {
 		}
 		// Re-throw the original error with gateway hint
 		throw new Error(
-			`${model.provider.toUpperCase()} API key not set. Either set the provider key or set AI_GATEWAY_API_KEY for unified access. See: aidiff models`,
+			`${model.provider.toUpperCase()} API key not set. Either set the provider key or set AI_GATEWAY_API_KEY for unified access. See: yardstiq models`,
 		);
 	}
 }

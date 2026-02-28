@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { parseBenchmarkFile } from '../../src/bench/parser.js';
 
 function writeTempYaml(content: string): string {
-	const dir = mkdtempSync(join(tmpdir(), 'aidiff-test-'));
+	const dir = mkdtempSync(join(tmpdir(), 'yardstiq-test-'));
 	const path = join(dir, 'bench.yaml');
 	writeFileSync(path, content, 'utf-8');
 	return path;

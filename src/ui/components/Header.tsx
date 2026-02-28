@@ -13,7 +13,7 @@ export function Header({ prompt, models }: Props) {
 		<Box flexDirection="column">
 			<Box>
 				<Text bold color="cyan">
-					aidiff
+					yardstiq
 				</Text>
 				<Text dimColor> — comparing {models.length} models</Text>
 			</Box>

@@ -21,7 +21,7 @@ export async function handleHistory(action?: string, name?: string): Promise<voi
 
 	if (action === 'show') {
 		if (!name) {
-			console.error('Usage: aidiff history show <name>');
+			console.error('Usage: yardstiq history show <name>');
 			process.exit(1);
 		}
 
