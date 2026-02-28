@@ -120,4 +120,24 @@ prompts:
 	it('throws for non-existent file', () => {
 		expect(() => parseBenchmarkFile('/nonexistent/path.yaml')).toThrow();
 	});
+
+	it('parses prompts with criteria field', () => {
+		const path = writeTempYaml(`
+name: "With Criteria"
+models:
+  - model-a
+  - model-b
+prompts:
+  - name: "Test"
+    prompt: "Hello"
+    criteria: "Be concise and accurate"
+`);
+		const suite = parseBenchmarkFile(path);
+		expect(suite.prompts[0].criteria).toBe('Be concise and accurate');
+	});
+
+	it('throws for YAML that parses to a non-object', () => {
+		const path = writeTempYaml('just a string');
+		expect(() => parseBenchmarkFile(path)).toThrow('expected a YAML object');
+	});
 });

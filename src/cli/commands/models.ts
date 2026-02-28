@@ -1,10 +1,11 @@
 import chalk from 'chalk';
 import { formatCost } from '../../core/cost.js';
 import { MODEL_REGISTRY } from '../../core/models.js';
-import { isGatewayAvailable } from '../../providers/registry.js';
+import { getAvailableProviders, isGatewayAvailable } from '../../providers/registry.js';
 
 export async function listModels(): Promise<void> {
 	const gatewayEnabled = isGatewayAvailable();
+	const directKeys = getAvailableProviders();
 
 	console.log(chalk.bold.cyan('\nAvailable Models\n'));
 
@@ -15,8 +16,8 @@ export async function listModels(): Promise<void> {
 		);
 	} else {
 		console.log(
-			chalk.red('  AI Gateway not configured') +
-				chalk.dim(' — set AI_GATEWAY_API_KEY to access models\n'),
+			chalk.yellow('  AI Gateway not configured') +
+				chalk.dim(' — set AI_GATEWAY_API_KEY for full access\n'),
 		);
 	}
 
@@ -36,7 +37,15 @@ export async function listModels(): Promise<void> {
 			const output = formatCost(model.pricing.output);
 			const pricing =
 				model.pricing.input === 0 ? chalk.dim('free') : chalk.dim(`${input}/${output} per 1M tok`);
-			const status = gatewayEnabled ? chalk.green('✓') : chalk.red('✗');
+
+			let status: string;
+			if (directKeys[provider]) {
+				status = chalk.green('✓ key');
+			} else if (gatewayEnabled) {
+				status = chalk.green('✓ gw');
+			} else {
+				status = chalk.red('✗');
+			}
 
 			console.log(
 				`    ${status} ${chalk.white(pad(alias, 22))}${chalk.dim(pad(model.name, 24))}${pricing}`,
@@ -51,9 +60,11 @@ export async function listModels(): Promise<void> {
 	);
 
 	if (!gatewayEnabled) {
-		console.log(chalk.yellow('\n  Set AI_GATEWAY_API_KEY to access all models:'));
-		console.log(chalk.dim('    export AI_GATEWAY_API_KEY=your_key'));
-		console.log(chalk.dim('    Get one at https://vercel.com/ai-gateway'));
+		console.log(chalk.yellow('\n  Set API keys to access models:'));
+		console.log(chalk.dim('    export AI_GATEWAY_API_KEY=your_key     (all models)'));
+		console.log(chalk.dim('    export ANTHROPIC_API_KEY=sk-ant-...    (Claude models)'));
+		console.log(chalk.dim('    export OPENAI_API_KEY=sk-...           (GPT models)'));
+		console.log(chalk.dim('    export GOOGLE_GENERATIVE_AI_API_KEY=... (Gemini models)'));
 	}
 
 	console.log('');

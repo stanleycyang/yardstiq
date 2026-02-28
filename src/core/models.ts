@@ -339,10 +339,6 @@ export function resolveModel(input: string): ModelConfig {
 		return MODEL_REGISTRY[input];
 	}
 
-	// Check by full model ID (e.g., "anthropic/claude-sonnet-4.6")
-	const byModelId = Object.values(MODEL_REGISTRY).find((m) => m.modelId === input);
-	if (byModelId) return byModelId;
-
 	throw new Error(
 		`Unknown model: "${input}". Use an alias (e.g. claude-sonnet), gateway format (e.g. openai/gpt-5.2), or run "yardstiq models".`,
 	);

@@ -150,6 +150,71 @@ describe('runBenchmarkSuite', () => {
 		expect(report.summary[0].model).toBe('claude-sonnet'); // same wins, higher avgScore
 	});
 
+	it('calls onJudgeError when judge throws', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const { judgeComparison } = await import('../../src/core/judge.js');
+		const mockedRun = vi.mocked(runComparison);
+		const mockedJudge = vi.mocked(judgeComparison);
+		mockedRun.mockReset();
+		mockedJudge.mockReset();
+
+		mockedRun.mockResolvedValue(makeResult('test', ['claude-sonnet', 'gpt-4o']));
+		mockedJudge.mockRejectedValue(new Error('Judge API failed'));
+
+		const onJudgeError = vi.fn();
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		await runBenchmarkSuite('tests/fixtures/test-benchmark.yaml', { onJudgeError });
+
+		expect(onJudgeError).toHaveBeenCalledTimes(2); // once per prompt
+		expect(onJudgeError.mock.calls[0][1].message).toBe('Judge API failed');
+	});
+
+	it('calls onJudgeResult when judge succeeds', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const { judgeComparison } = await import('../../src/core/judge.js');
+		const mockedRun = vi.mocked(runComparison);
+		const mockedJudge = vi.mocked(judgeComparison);
+		mockedRun.mockReset();
+		mockedJudge.mockReset();
+
+		mockedRun.mockResolvedValue(makeResult('test', ['claude-sonnet', 'gpt-4o']));
+		mockedJudge.mockResolvedValue({
+			winner: 'claude-sonnet',
+			reasoning: 'Better',
+			scores: [
+				{ model: 'claude-sonnet', score: 9, strengths: ['good'], weaknesses: [] },
+				{ model: 'gpt-4o', score: 7, strengths: ['ok'], weaknesses: ['verbose'] },
+			],
+			judgeModel: 'claude-sonnet',
+			judgeCost: 0.01,
+		});
+
+		const onJudgeResult = vi.fn();
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		await runBenchmarkSuite('tests/fixtures/test-benchmark.yaml', { onJudgeResult });
+
+		expect(onJudgeResult).toHaveBeenCalledTimes(2);
+		expect(onJudgeResult).toHaveBeenCalledWith(0, 'claude-sonnet');
+	});
+
+	it('runs without judge and returns summary with zero scores', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const mockedRun = vi.mocked(runComparison);
+		mockedRun.mockReset();
+
+		mockedRun.mockResolvedValue(makeResult('test', ['claude-sonnet', 'gpt-4o']));
+
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		const report = await runBenchmarkSuite('tests/fixtures/test-benchmark-nojudge.yaml');
+
+		expect(report.suite).toBe('No Judge Benchmark');
+		expect(report.results).toHaveLength(1);
+		for (const s of report.summary) {
+			expect(s.wins).toBe(0);
+			expect(s.avgScore).toBe(0);
+		}
+	});
+
 	it('calls onExpectedMissing for missing expected strings', async () => {
 		const { runComparison } = await import('../../src/core/runner.js');
 		const mockedRun = vi.mocked(runComparison);
@@ -166,5 +231,121 @@ describe('runBenchmarkSuite', () => {
 		await runBenchmarkSuite('tests/fixtures/test-benchmark.yaml', { onExpectedMissing });
 
 		expect(onExpectedMissing).toHaveBeenCalledWith('Hello world', 'claude-sonnet', ['hello']);
+	});
+
+	it('handles judge scores missing for a model', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const { judgeComparison } = await import('../../src/core/judge.js');
+		const mockedRun = vi.mocked(runComparison);
+		const mockedJudge = vi.mocked(judgeComparison);
+		mockedRun.mockReset();
+		mockedJudge.mockReset();
+
+		mockedRun.mockResolvedValue(makeResult('test', ['claude-sonnet', 'gpt-4o']));
+
+		// Judge scores only include claude-sonnet, not gpt-4o
+		mockedJudge.mockResolvedValue({
+			winner: 'claude-sonnet',
+			reasoning: 'Better',
+			scores: [{ model: 'claude-sonnet', score: 9, strengths: ['good'], weaknesses: [] }],
+			judgeModel: 'claude-sonnet',
+			judgeCost: 0.01,
+		});
+
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		const report = await runBenchmarkSuite('tests/fixtures/test-benchmark.yaml');
+
+		const gpt = report.summary.find((s) => s.model === 'gpt-4o');
+		// gpt-4o should have 0 avg score since judge scores didn't include it
+		expect(gpt?.avgScore).toBe(0);
+	});
+
+	it('handles expectedContains when all strings are found', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const mockedRun = vi.mocked(runComparison);
+		mockedRun.mockReset();
+
+		const result = makeResult('Say hello', ['claude-sonnet', 'gpt-4o']);
+		// Both responses contain "hello" — no onExpectedMissing call
+		result.responses[0].output = 'hello world';
+		result.responses[1].output = 'hello there';
+		mockedRun.mockResolvedValueOnce(result);
+		mockedRun.mockResolvedValueOnce(makeResult('Count', ['claude-sonnet', 'gpt-4o']));
+
+		const onExpectedMissing = vi.fn();
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		await runBenchmarkSuite('tests/fixtures/test-benchmark.yaml', { onExpectedMissing });
+
+		expect(onExpectedMissing).not.toHaveBeenCalled();
+	});
+
+	it('handles mismatched model aliases in stats (edge case)', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const { judgeComparison } = await import('../../src/core/judge.js');
+		const mockedRun = vi.mocked(runComparison);
+		const mockedJudge = vi.mocked(judgeComparison);
+		mockedRun.mockReset();
+		mockedJudge.mockReset();
+
+		// Result where response aliases don't match suite models
+		const oddResult: ComparisonResult = {
+			id: 'test-id',
+			prompt: 'test',
+			responses: [
+				{
+					model: makeModelConfig('unknown-model'),
+					output: 'Response',
+					timing: { startedAt: 0, completedAt: 100, totalMs: 100 },
+					usage: { inputTokens: 10, outputTokens: 20, totalTokens: 30 },
+					cost: { inputCost: 0.001, outputCost: 0.002, totalCost: 0.003 },
+					status: 'success' as const,
+				},
+			],
+			judge: {
+				winner: 'unknown-winner',
+				reasoning: 'Better',
+				scores: [{ model: 'unknown-model', score: 9, strengths: ['good'], weaknesses: [] }],
+				judgeModel: 'claude-sonnet',
+				judgeCost: 0.01,
+			},
+			createdAt: new Date().toISOString(),
+			totalCost: 0.003,
+			totalTimeMs: 100,
+		};
+		mockedRun.mockResolvedValueOnce(oddResult);
+
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		const report = await runBenchmarkSuite('tests/fixtures/test-benchmark-nojudge.yaml');
+
+		// Suite models are claude-sonnet and gpt-4o, but responses are from unknown-model
+		// So stats for suite models should have empty arrays
+		for (const s of report.summary) {
+			expect(s.wins).toBe(0);
+			expect(s.avgScore).toBe(0);
+			expect(s.avgTimeMs).toBe(0);
+			expect(s.avgCost).toBe(0);
+		}
+	});
+
+	it('skips expectedContains check for failed responses', async () => {
+		const { runComparison } = await import('../../src/core/runner.js');
+		const mockedRun = vi.mocked(runComparison);
+		mockedRun.mockReset();
+
+		const result = makeResult('Say hello', ['claude-sonnet', 'gpt-4o']);
+		result.responses[0].status = 'error';
+		result.responses[0].output = '';
+		mockedRun.mockResolvedValueOnce(result);
+		mockedRun.mockResolvedValueOnce(makeResult('Count', ['claude-sonnet', 'gpt-4o']));
+
+		const onExpectedMissing = vi.fn();
+		const { runBenchmarkSuite } = await import('../../src/bench/runner.js');
+		await runBenchmarkSuite('tests/fixtures/test-benchmark.yaml', { onExpectedMissing });
+
+		// Only gpt-4o should trigger (not the errored claude-sonnet)
+		const claudeCalls = onExpectedMissing.mock.calls.filter(
+			(c: [string, string, string[]]) => c[1] === 'claude-sonnet',
+		);
+		expect(claudeCalls).toHaveLength(0);
 	});
 });

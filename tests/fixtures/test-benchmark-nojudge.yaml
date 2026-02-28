@@ -1,0 +1,9 @@
+name: "No Judge Benchmark"
+description: "Benchmark without judge for coverage"
+models:
+  - claude-sonnet
+  - gpt-4o
+prompts:
+  - name: "Simple"
+    prompt: "Say hi"
+    criteria: "Be friendly"

@@ -28,7 +28,7 @@ export function parseBenchmarkFile(filePath: string): BenchmarkSuite {
 			throw new Error(`Prompt at index ${i} missing required field: "name"`);
 		}
 		if (!p.prompt || typeof p.prompt !== 'string') {
-			throw new Error(`Prompt "${p.name || i}" missing required field: "prompt"`);
+			throw new Error(`Prompt "${p.name}" missing required field: "prompt"`);
 		}
 	}
 

@@ -1,9 +1,15 @@
+[![CI](https://github.com/stanleycyang/aidiff/actions/workflows/ci.yml/badge.svg)](https://github.com/stanleycyang/aidiff/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/yardstiq)](https://www.npmjs.com/package/yardstiq)
+[![npm downloads](https://img.shields.io/npm/dm/yardstiq)](https://www.npmjs.com/package/yardstiq)
+[![Node.js](https://img.shields.io/node/v/yardstiq)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 # yardstiq
 
-Compare AI model outputs side-by-side in your terminal. Send one prompt to multiple models, see their responses stream in parallel, and get performance stats (speed, tokens, cost) — all in a single command.
+Compare AI model outputs side-by-side in your terminal. One prompt, multiple models, real-time streaming, performance stats, and an AI judge — all in a single command.
 
-```
-yardstiq "Explain quicksort in 3 sentences" -m claude-sonnet -m gpt-4o
+```bash
+npx yardstiq "Explain quicksort in 3 sentences" -m claude-sonnet -m gpt-4o
 ```
 
 ```
@@ -31,23 +37,28 @@ yardstiq "Explain quicksort in 3 sentences" -m claude-sonnet -m gpt-4o
  └────────────────────────────────────────────────────────────────────────┘
 ```
 
+## Features
+
+- **Side-by-side streaming** — Watch model outputs appear in parallel, in real time
+- **40+ models** — Claude, GPT, Gemini, Llama, DeepSeek, Mistral, Grok, and more
+- **Performance stats** — Time, TTFT, token counts, throughput, and cost per model
+- **AI judge** — Let an AI evaluate which response is best with scored verdicts
+- **Multiple export formats** — JSON, Markdown, and self-contained HTML reports
+- **Benchmarks** — Run YAML-defined prompt suites across models with aggregate scoring
+- **History** — Save and revisit past comparisons
+- **Local models** — Compare against Ollama models with zero API cost
+- **Flexible auth** — AI Gateway for one-key access, or individual provider keys
+
 ## Install
 
-### npm
-
 ```bash
+# npm
 npm install -g yardstiq
-```
 
-### pnpm
-
-```bash
+# pnpm
 pnpm add -g yardstiq
-```
 
-### npx (no install)
-
-```bash
+# npx (no install)
 npx yardstiq "your prompt" -m claude-sonnet -m gpt-4o
 ```
 
@@ -63,11 +74,11 @@ node dist/index.js --help
 
 ## Setup
 
-yardstiq needs API keys to call models. You have two options:
+yardstiq needs API keys to call models. Choose one or both options:
 
-### Option A: One key for everything (recommended)
+### Option A: AI Gateway (recommended)
 
-Set `AI_GATEWAY_API_KEY` to access 100+ models from every provider through the [Vercel AI Gateway](https://vercel.com/ai-gateway) — no markup on token pricing.
+One key for 40+ models from every provider through the [Vercel AI Gateway](https://vercel.com/ai-gateway) — no markup on token pricing.
 
 ```bash
 export AI_GATEWAY_API_KEY=your_gateway_key
@@ -83,18 +94,17 @@ Set keys for the providers you want to use:
 export ANTHROPIC_API_KEY=sk-ant-...      # Claude models
 export OPENAI_API_KEY=sk-...             # GPT models
 export GOOGLE_GENERATIVE_AI_API_KEY=...  # Gemini models
-export GROQ_API_KEY=...                  # Llama via Groq
-export DEEPSEEK_API_KEY=...              # DeepSeek models
-export MISTRAL_API_KEY=...               # Mistral models
 ```
 
-> **Tip:** If you have `AI_GATEWAY_API_KEY` set, yardstiq will automatically fall back to the gateway when a direct provider key is missing. You can mix both approaches.
+> **Tip:** If you have `AI_GATEWAY_API_KEY` set, yardstiq will fall back to the gateway when a direct provider key is missing. You can mix both approaches.
 
 You can also store keys persistently:
 
 ```bash
+yardstiq config set gateway-key your_key
 yardstiq config set anthropic-key sk-ant-...
 yardstiq config set openai-key sk-...
+yardstiq config set google-key your_key
 ```
 
 ### Local models (Ollama)
@@ -200,26 +210,22 @@ yardstiq "hello" -m claude-sonnet -m gpt-4o --no-stream
 
 ## Models
 
-Run `yardstiq models` to see all available models with pricing and status:
+Run `yardstiq models` to see all 40 built-in models with pricing and access status.
 
-```
-Alias             Name                  Provider    Input/1M  Output/1M Status
-────────────────────────────────────────────────────────────────────────────────
-claude-sonnet     Claude Sonnet         anthropic   $3.00     $15.00    ✓ gw
-claude-haiku      Claude Haiku          anthropic   $0.80     $4.00     ✓ gw
-claude-opus       Claude Opus           anthropic   $15.00    $75.00    ✓ gw
-gpt-4o            GPT-4o                openai      $2.50     $10.00    ✓ key
-gpt-4o-mini       GPT-4o Mini           openai      $0.15     $0.60     ✓ key
-gpt-4.1           GPT-4.1               openai      $2.00     $8.00     ✓ key
-gpt-4.1-mini      GPT-4.1 Mini          openai      $0.40     $1.60     ✓ key
-gpt-4.1-nano      GPT-4.1 Nano          openai      $0.10     $0.40     ✓ key
-o3-mini           o3-mini               openai      $1.10     $4.40     ✓ key
-gemini-pro        Gemini 2.0 Pro        google      $1.25     $10.00    ✓ gw
-gemini-flash      Gemini 2.0 Flash      google      $0.10     $0.40     ✓ gw
-llama3            Llama 3.1 70B         groq        $0.59     $0.79     ✓ gw
-deepseek          DeepSeek Chat         deepseek    $0.14     $0.28     ✓ gw
-mistral-large     Mistral Large         mistral     $2.00     $6.00     ✓ gw
-```
+| Provider | Models | Aliases |
+|----------|--------|---------|
+| **Anthropic** | Claude Sonnet 4.6, Haiku 4.5, Opus 4.6, 3.5 Sonnet | `claude-sonnet`, `claude-haiku`, `claude-opus`, `claude-3.5-sonnet` |
+| **OpenAI** | GPT-4o, 4o Mini, 4.1, 4.1 Mini/Nano, 5, 5 Mini/Nano, o3-mini, Codex Mini | `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano`, `gpt-5`, `gpt-5-mini`, `gpt-5-nano`, `o3-mini`, `codex-mini` |
+| **Google** | Gemini 2.5 Pro/Flash/Flash Lite, 3 Flash/Pro | `gemini-pro`, `gemini-flash`, `gemini-flash-lite`, `gemini-3-flash`, `gemini-3-pro` |
+| **DeepSeek** | V3.2, R1 | `deepseek`, `deepseek-r1` |
+| **Mistral** | Large 3, Magistral Medium/Small, Codestral | `mistral-large`, `magistral-medium`, `magistral-small`, `codestral` |
+| **Meta** | Llama 4 Maverick/Scout, 3.3 70B | `llama-4-maverick`, `llama-4-scout`, `llama-3.3-70b` |
+| **xAI** | Grok 3 | `grok-3` |
+| **Amazon** | Nova Pro, Nova Lite | `nova-pro`, `nova-lite` |
+| **Cohere** | Command A | `command-a` |
+| **Alibaba** | Qwen 3.5 Flash/Plus | `qwen3.5-flash`, `qwen3.5-plus` |
+| **Moonshot** | Kimi K2, K2.5 | `kimi-k2`, `kimi-k2.5` |
+| **MiniMax** | M2.5 | `minimax-m2.5` |
 
 **Status key:** `✓ key` = direct API key configured, `✓ gw` = available via AI Gateway, `✗` = no access
 
@@ -229,7 +235,6 @@ mistral-large     Mistral Large         mistral     $2.00     $6.00     ✓ gw
 |--------|---------|-------------|
 | Alias | `claude-sonnet` | Built-in shorthand for popular models |
 | Gateway | `openai/gpt-5.2` | Any model via AI Gateway (`provider/model`) |
-| Full ID | `claude-sonnet-4-20250514` | Exact model version |
 | Local | `local:llama3.2` | Ollama models |
 
 ## CLI Reference
@@ -274,13 +279,22 @@ Commands:
 git clone https://github.com/stanleycyang/aidiff.git
 cd aidiff
 pnpm install
-pnpm build        # Build with tsup
-pnpm dev          # Watch mode
-pnpm test         # Run tests
-pnpm typecheck    # Type check
-pnpm lint         # Lint with Biome
+pnpm build           # Build with tsup
+pnpm dev             # Watch mode
+pnpm test            # Run tests
+pnpm test:coverage   # Run tests with 100% coverage enforcement
+pnpm typecheck       # Type check
+pnpm lint            # Lint with Biome
 ```
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Make your changes with tests
+4. Ensure `pnpm test:coverage` passes at 100%
+5. Submit a pull request
 
 ## License
 
-MIT
+[MIT](LICENSE)

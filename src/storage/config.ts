@@ -5,6 +5,9 @@ import { join } from 'node:path';
 export interface AidiffConfig {
 	keys?: {
 		gateway?: string;
+		anthropic?: string;
+		openai?: string;
+		google?: string;
 	};
 	defaults?: {
 		models?: string[];
@@ -37,12 +40,21 @@ export function saveConfig(config: AidiffConfig): void {
 	writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
+/** Keys that map to config.keys.* */
+const KEY_MAP: Record<string, string> = {
+	'gateway-key': 'gateway',
+	'anthropic-key': 'anthropic',
+	'openai-key': 'openai',
+	'google-key': 'google',
+};
+
 export function setConfigValue(key: string, value: string): void {
 	const config = getConfig();
 
-	if (key === 'gateway-key') {
+	const keyField = KEY_MAP[key];
+	if (keyField) {
 		if (!config.keys) config.keys = {};
-		config.keys.gateway = value;
+		(config.keys as Record<string, string>)[keyField] = value;
 	} else {
 		if (!config.defaults) config.defaults = {};
 		if (key === 'temperature') {
@@ -60,7 +72,10 @@ export function setConfigValue(key: string, value: string): void {
 export function getConfigValue(key: string): string | undefined {
 	const config = getConfig();
 
-	if (key === 'gateway-key') return config.keys?.gateway;
+	const keyField = KEY_MAP[key];
+	if (keyField) {
+		return (config.keys as Record<string, string> | undefined)?.[keyField];
+	}
 	if (key === 'temperature') return config.defaults?.temperature?.toString();
 	if (key === 'max-tokens') return config.defaults?.maxTokens?.toString();
 	if (key === 'judge-model') return config.defaults?.judgeModel;
