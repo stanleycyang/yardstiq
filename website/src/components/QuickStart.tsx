@@ -7,9 +7,9 @@ const steps = [
   },
   {
     step: "2",
-    title: "Set your API key",
-    code: '# One key for 40+ models via Vercel AI Gateway\nexport AI_GATEWAY_API_KEY=your_key\n\n# Or individual provider keys\nexport ANTHROPIC_API_KEY=sk-ant-...\nexport OPENAI_API_KEY=sk-...',
-    alt: null,
+    title: "Configure your API keys",
+    code: "# Interactive setup — walks you through it\nyardstiq setup\n\n# Or configure a single provider directly\nyardstiq setup --provider gateway",
+    alt: "# Prefer env vars? That works too\nexport AI_GATEWAY_API_KEY=your_key\nexport ANTHROPIC_API_KEY=sk-ant-...",
   },
   {
     step: "3",

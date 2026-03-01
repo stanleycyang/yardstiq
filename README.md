@@ -74,21 +74,32 @@ node dist/index.js --help
 
 ## Setup
 
-yardstiq needs API keys to call models. Choose one or both options:
+yardstiq needs API keys to call models. The fastest way to get started:
 
-### Option A: AI Gateway (recommended)
-
-One key for 40+ models from every provider through the [Vercel AI Gateway](https://vercel.com/ai-gateway) — no markup on token pricing.
+### Interactive setup (recommended)
 
 ```bash
-export AI_GATEWAY_API_KEY=your_gateway_key
+yardstiq setup
 ```
 
-Get your key at [vercel.com/ai-gateway](https://vercel.com/ai-gateway).
+This walks you through configuring API keys with a guided prompt. Keys are saved to `~/.yardstiq/config.json` and loaded automatically — no shell config needed.
 
-### Option B: Individual provider keys
+You can also configure a single provider directly:
 
-Set keys for the providers you want to use:
+```bash
+yardstiq setup --provider gateway
+yardstiq setup --provider anthropic
+yardstiq setup --provider openai
+yardstiq setup --provider google
+```
+
+### AI Gateway (one key for all models)
+
+The [Vercel AI Gateway](https://vercel.com/ai-gateway) gives you access to 40+ models from every provider with a single key — no markup on token pricing. Get your key at [vercel.com/ai-gateway](https://vercel.com/ai-gateway).
+
+### Individual provider keys
+
+If you prefer environment variables, set keys for the providers you want:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...      # Claude models
@@ -96,9 +107,7 @@ export OPENAI_API_KEY=sk-...             # GPT models
 export GOOGLE_GENERATIVE_AI_API_KEY=...  # Gemini models
 ```
 
-> **Tip:** If you have `AI_GATEWAY_API_KEY` set, yardstiq will fall back to the gateway when a direct provider key is missing. You can mix both approaches.
-
-You can also store keys persistently:
+Or store them persistently via the CLI:
 
 ```bash
 yardstiq config set gateway-key your_key
@@ -106,6 +115,8 @@ yardstiq config set anthropic-key sk-ant-...
 yardstiq config set openai-key sk-...
 yardstiq config set google-key your_key
 ```
+
+> **Tip:** Environment variables take priority over saved config. If you have `AI_GATEWAY_API_KEY` set, yardstiq will fall back to the gateway when a direct provider key is missing. You can mix both approaches.
 
 ### Local models (Ollama)
 
@@ -267,10 +278,89 @@ Options:
   -h, --help                     display help for command
 
 Commands:
+  setup [--provider <name>]      Interactive API key setup
   models                         List available models and pricing
   history [action] [name]        Browse saved comparisons
   config <action> [key] [value]  Manage configuration
-  bench [options] <file>          Run a benchmark suite
+  bench [options] <file>         Run a benchmark suite
+```
+
+### `yardstiq setup`
+
+Interactive wizard to configure API keys. Keys are saved to `~/.yardstiq/config.json` and loaded automatically on every run.
+
+```bash
+# Guided setup — select providers from a list
+yardstiq setup
+
+# Configure a single provider directly
+yardstiq setup --provider gateway
+yardstiq setup --provider anthropic
+yardstiq setup --provider openai
+yardstiq setup --provider google
+```
+
+### `yardstiq models`
+
+List all available models with pricing and access status.
+
+```bash
+yardstiq models
+```
+
+### `yardstiq config`
+
+Manage configuration values (API keys, defaults).
+
+```bash
+# List all current config
+yardstiq config list
+
+# Get a specific value
+yardstiq config get gateway-key
+yardstiq config get temperature
+
+# Set values
+yardstiq config set gateway-key your_key
+yardstiq config set anthropic-key sk-ant-...
+yardstiq config set openai-key sk-...
+yardstiq config set google-key your_key
+yardstiq config set temperature 0.7
+yardstiq config set max-tokens 4096
+yardstiq config set judge-model gpt-4.1
+```
+
+### `yardstiq history`
+
+Save and revisit past comparisons.
+
+```bash
+# Save a comparison
+yardstiq "Explain quicksort" -m claude-sonnet -m gpt-4o --save quicksort
+
+# List all saved comparisons
+yardstiq history list
+
+# Show a saved comparison
+yardstiq history show quicksort
+
+# Clear all history
+yardstiq history clear
+```
+
+### `yardstiq bench`
+
+Run a YAML-defined benchmark suite across multiple models.
+
+```bash
+# Run a built-in benchmark
+yardstiq bench benchmarks/coding.yaml
+
+# Save benchmark results
+yardstiq bench benchmarks/reasoning.yaml --save reasoning-test
+
+# Output results as JSON
+yardstiq bench benchmarks/writing.yaml --json > results.json
 ```
 
 ## Development
