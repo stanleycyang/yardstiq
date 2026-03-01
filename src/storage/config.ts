@@ -40,6 +40,30 @@ export function saveConfig(config: AidiffConfig): void {
 	writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
+/** Maps config key names to environment variable names */
+export const CONFIG_TO_ENV: Record<string, string> = {
+	gateway: 'AI_GATEWAY_API_KEY',
+	anthropic: 'ANTHROPIC_API_KEY',
+	openai: 'OPENAI_API_KEY',
+	google: 'GOOGLE_GENERATIVE_AI_API_KEY',
+};
+
+/**
+ * Loads API keys from config file into process.env.
+ * Env vars already set take priority (never overwritten).
+ */
+export function loadConfigKeys(): void {
+	const config = getConfig();
+	if (!config.keys) return;
+
+	for (const [configKey, envVar] of Object.entries(CONFIG_TO_ENV)) {
+		const value = (config.keys as Record<string, string>)[configKey];
+		if (value && !process.env[envVar]) {
+			process.env[envVar] = value;
+		}
+	}
+}
+
 /** Keys that map to config.keys.* */
 const KEY_MAP: Record<string, string> = {
 	'gateway-key': 'gateway',

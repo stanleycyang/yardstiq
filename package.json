@@ -1,6 +1,6 @@
 {
   "name": "yardstiq",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Side-by-side AI model comparison CLI",
   "type": "module",
   "bin": {
@@ -52,6 +52,7 @@
     "@ai-sdk/gateway": "^3.0.58",
     "@ai-sdk/google": "^3.0.33",
     "@ai-sdk/openai": "^3.0.36",
+    "@inquirer/prompts": "^8.3.0",
     "ai": "^6.0.104",
     "chalk": "^5.6.2",
     "commander": "^14.0.3",

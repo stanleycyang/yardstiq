@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('node:fs', () => ({
 	existsSync: vi.fn(),
@@ -191,6 +191,113 @@ describe('storage/config', () => {
 			expect(written.keys.gateway).toBe('existing');
 			expect(written.defaults.temperature).toBe(0.5);
 			expect(written.defaults.maxTokens).toBe(2048);
+		});
+	});
+
+	describe('loadConfigKeys', () => {
+		const ENV_VARS = [
+			'AI_GATEWAY_API_KEY',
+			'ANTHROPIC_API_KEY',
+			'OPENAI_API_KEY',
+			'GOOGLE_GENERATIVE_AI_API_KEY',
+		];
+
+		beforeEach(() => {
+			for (const v of ENV_VARS) {
+				delete process.env[v];
+			}
+		});
+
+		afterEach(() => {
+			for (const v of ENV_VARS) {
+				delete process.env[v];
+			}
+		});
+
+		it('loads gateway key into AI_GATEWAY_API_KEY', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue(JSON.stringify({ keys: { gateway: 'gw-123' } }));
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.AI_GATEWAY_API_KEY).toBe('gw-123');
+		});
+
+		it('loads anthropic key into ANTHROPIC_API_KEY', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue(
+				JSON.stringify({ keys: { anthropic: 'sk-ant-123' } }),
+			);
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.ANTHROPIC_API_KEY).toBe('sk-ant-123');
+		});
+
+		it('loads openai key into OPENAI_API_KEY', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue(JSON.stringify({ keys: { openai: 'sk-oai-123' } }));
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.OPENAI_API_KEY).toBe('sk-oai-123');
+		});
+
+		it('loads google key into GOOGLE_GENERATIVE_AI_API_KEY', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue(JSON.stringify({ keys: { google: 'goog-123' } }));
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.GOOGLE_GENERATIVE_AI_API_KEY).toBe('goog-123');
+		});
+
+		it('does not overwrite existing env vars', async () => {
+			process.env.ANTHROPIC_API_KEY = 'already-set';
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue(
+				JSON.stringify({ keys: { anthropic: 'from-config' } }),
+			);
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.ANTHROPIC_API_KEY).toBe('already-set');
+		});
+
+		it('handles empty config (no keys)', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue('{}');
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.AI_GATEWAY_API_KEY).toBeUndefined();
+			expect(process.env.ANTHROPIC_API_KEY).toBeUndefined();
+		});
+
+		it('handles missing config file', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockImplementation(() => {
+				throw new Error('ENOENT');
+			});
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys(); // should not throw
+			expect(process.env.AI_GATEWAY_API_KEY).toBeUndefined();
+		});
+
+		it('loads multiple keys at once', async () => {
+			const { readFileSync } = await import('node:fs');
+			vi.mocked(readFileSync).mockReturnValue(
+				JSON.stringify({
+					keys: { gateway: 'gw-key', anthropic: 'ant-key', openai: 'oai-key' },
+				}),
+			);
+
+			const { loadConfigKeys } = await import('../../src/storage/config.js');
+			loadConfigKeys();
+			expect(process.env.AI_GATEWAY_API_KEY).toBe('gw-key');
+			expect(process.env.ANTHROPIC_API_KEY).toBe('ant-key');
+			expect(process.env.OPENAI_API_KEY).toBe('oai-key');
 		});
 	});
 

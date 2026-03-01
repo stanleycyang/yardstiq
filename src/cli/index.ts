@@ -3,6 +3,10 @@ import { createRequire } from 'node:module';
 import { Command } from 'commander';
 import { resolveModel } from '../core/models.js';
 import { resolveProvider } from '../providers/registry.js';
+import { loadConfigKeys } from '../storage/config.js';
+
+// Load saved API keys into process.env before any command runs
+loadConfigKeys();
 
 const require = createRequire(import.meta.url);
 // Path is relative to bundled dist/index.js, not the source file
@@ -157,6 +161,15 @@ program
 	.action(async (file: string, options: { save?: string | boolean; json?: boolean }) => {
 		const { runBenchmark } = await import('./commands/bench.js');
 		await runBenchmark(file, options);
+	});
+
+program
+	.command('setup')
+	.description('Interactive API key setup')
+	.option('--provider <name>', 'Configure a single provider (gateway, anthropic, openai, google)')
+	.action(async (options: { provider?: string }) => {
+		const { handleSetup } = await import('./commands/setup.js');
+		await handleSetup(options);
 	});
 
 program.parse();
