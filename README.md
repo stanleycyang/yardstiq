@@ -1,4 +1,4 @@
-[![CI](https://github.com/stanleycyang/aidiff/actions/workflows/ci.yml/badge.svg)](https://github.com/stanleycyang/aidiff/actions/workflows/ci.yml)
+[![CI](https://github.com/stanleycyang/yardstiq/actions/workflows/ci.yml/badge.svg)](https://github.com/stanleycyang/yardstiq/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/yardstiq)](https://www.npmjs.com/package/yardstiq)
 [![npm downloads](https://img.shields.io/npm/dm/yardstiq)](https://www.npmjs.com/package/yardstiq)
 [![Node.js](https://img.shields.io/node/v/yardstiq)](https://nodejs.org)
@@ -6,10 +6,12 @@
 
 # yardstiq
 
-Compare AI model outputs side-by-side in your terminal. One prompt, multiple models, real-time streaming, performance stats, and an AI judge — all in a single command.
+> Compare AI models side-by-side in your terminal. One prompt, multiple models, real-time streaming, performance stats, and an AI judge — all in a single command.
+
+![yardstiq demo](demo.gif)
 
 ```bash
-npx yardstiq "Explain quicksort in 3 sentences" -m claude-sonnet -m gpt-4o
+npx yardstiq "Which AI model is best for coding?" -m claude-sonnet -m gpt-4o -m gemini-flash
 ```
 
 ```
@@ -37,6 +39,19 @@ npx yardstiq "Explain quicksort in 3 sentences" -m claude-sonnet -m gpt-4o
  └────────────────────────────────────────────────────────────────────────┘
 ```
 
+## Quick Start
+
+```bash
+# Install globally
+npm install -g yardstiq
+
+# Run your first comparison (no install needed)
+npx yardstiq "Explain recursion in simple terms" -m claude-sonnet -m gpt-4o
+
+# Compare 3 models with the AI judge
+npx yardstiq "Write a binary search function" -m claude-sonnet -m gpt-4o -m gemini-flash --judge
+```
+
 ## Features
 
 - **Side-by-side streaming** — Watch model outputs appear in parallel, in real time
@@ -48,6 +63,15 @@ npx yardstiq "Explain quicksort in 3 sentences" -m claude-sonnet -m gpt-4o
 - **History** — Save and revisit past comparisons
 - **Local models** — Compare against Ollama models with zero API cost
 - **Flexible auth** — AI Gateway for one-key access, or individual provider keys
+
+## Why yardstiq?
+
+Choosing between AI models shouldn't require opening 3 browser tabs and copy-pasting the same prompt manually. yardstiq runs your prompt through every model **simultaneously**, streams the results side-by-side, and gives you real performance data — so you can make informed decisions about which model to use for your actual workload.
+
+- 🚀 **Faster decisions** — stop guessing, start comparing
+- 💰 **Cost visibility** — see what each call actually costs before you commit
+- 🏆 **AI judge** — automated quality scoring with reasoning
+- 🔒 **Privacy-first** — all comparisons run locally; nothing is stored externally
 
 ## Install
 
@@ -65,8 +89,8 @@ npx yardstiq "your prompt" -m claude-sonnet -m gpt-4o
 ### From source
 
 ```bash
-git clone https://github.com/stanleycyang/aidiff.git
-cd aidiff
+git clone https://github.com/stanleycyang/yardstiq.git
+cd yardstiq
 pnpm install
 pnpm build
 node dist/index.js --help
@@ -366,8 +390,8 @@ yardstiq bench benchmarks/writing.yaml --json > results.json
 ## Development
 
 ```bash
-git clone https://github.com/stanleycyang/aidiff.git
-cd aidiff
+git clone https://github.com/stanleycyang/yardstiq.git
+cd yardstiq
 pnpm install
 pnpm build           # Build with tsup
 pnpm dev             # Watch mode
